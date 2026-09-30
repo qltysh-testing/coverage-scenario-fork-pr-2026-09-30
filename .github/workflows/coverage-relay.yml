@@ -58,9 +58,11 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_COMMIT_TIME: ${{ github.event.workflow_run.head_commit.timestamp }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         run: |
-          qlty coverage publish \
+          token=$(curl -sSf -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://qlty.sh" | jq -r .value)
+          echo "::add-mask::${token}"
+          QLTY_COVERAGE_TOKEN="$token" qlty coverage publish \
             --override-commit-sha "$HEAD_SHA" \
             --override-branch "$HEAD_BRANCH" \
             --override-commit-time "$HEAD_COMMIT_TIME" \
