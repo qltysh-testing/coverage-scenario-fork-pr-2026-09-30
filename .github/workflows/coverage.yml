@@ -20,11 +20,13 @@ jobs:
       # Pull requests from forks get neither secrets nor an OIDC token, so the
       # upload happens in coverage-relay.yml instead, from the coverage file
       # saved as an artifact below.
+      # Test: attempt the direct upload with the token secret on every event,
+      # including this fork PR, and let the run continue so the relay fires.
       - name: Publish coverage to Qlty
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
         uses: qltysh/qlty-action/coverage@v2
         with:
-          oidc: true
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: coverage/lcov.info
 
       - name: Save coverage for the relay
